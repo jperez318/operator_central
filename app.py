@@ -5,7 +5,6 @@ from models import db, Operator, Training, TrainingStatus
 app = Flask(__name__)
 CORS(app)
 
-# 🔧 Use PostgreSQL from the start
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Jp072303#@localhost/operator_training'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -14,10 +13,21 @@ db.init_app(app)
 @app.route("/")
 def index():
     return "Backend is running!"
+
 @app.route("/operators", methods=["GET"])
 def get_operators():
-    ops = Operator.query.all()
-    return jsonify([{"id": op.id, "name": op.name} for op in ops])
+    training_id = request.args.get("training_id", type=int)
+
+    results = []
+    for op in Operator.query.all():
+        status_record = TrainingStatus.query.filter_by(operator_id=op.id, training_id=training_id).first()
+        results.append({
+            "id": op.id,
+            "name": op.name,
+            "status": status_record.status if status_record else None
+        })
+
+    return jsonify(results)
 
 @app.route("/operators", methods=["POST"])
 def add_operator():
@@ -25,7 +35,19 @@ def add_operator():
     op = Operator(name=data["name"])
     db.session.add(op)
     db.session.commit()
-    return jsonify({"id": op.id, "name": op.name})
+    
+    training_status = TrainingStatus(
+        operator_id=op.id, training_id=1, status="not_trained"
+    )
+    db.session.add(training_status)
+    db.session.commit()
+
+    return jsonify({
+        "id": op.id,
+        "name": op.name,
+        "status": "not_trained"
+    })
+
 
 @app.route("/operators/<int:id>", methods=["DELETE"])
 def delete_operator(id):
@@ -33,6 +55,24 @@ def delete_operator(id):
     db.session.delete(op)
     db.session.commit()
     return jsonify({"message": "Deleted"})
+
+@app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
+def update_status(operator_id, training_id):
+    data = request.json
+    new_status = data.get("status")
+
+    if new_status not in ["not_trained", "trained", "shadowed", "can_train"]:
+        return jsonify({"error": "Invalid status"}), 400
+
+    training_status = TrainingStatus.query.filter_by(operator_id=operator_id, training_id=training_id).first()
+    if not training_status:
+        training_status = TrainingStatus(operator_id=operator_id, training_id=training_id, status=new_status)
+        db.session.add(training_status)
+    else:
+        training_status.status = new_status
+
+    db.session.commit()
+    return jsonify({"message": "Status updated"})
 
 if __name__ == "__main__":
     app.run(debug=True)

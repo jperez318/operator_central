@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import OperatorCard from "./OperatorCard";
-
-/*
-const mockOperators = [
-  { id: 1, name: "Alice", status: "trained" },
-  { id: 2, name: "Bob", status: "not_trained" },
-  { id: 3, name: "Charlie", status: "can_train" },
-  { id: 4, name: "Diana", status: "shadowed" },
-];
- */
-
-
+import { useDrop } from "react-dnd";
+import AddOperator from "./AddOperator";
 
 const categories = ["not_trained", "trained", "shadowed", "can_train"];
 const displayNames = {
@@ -23,40 +14,122 @@ const displayNames = {
 
 export default function TrainingBoard() {
   const [operators, setOperators] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [trainingId, setTrainingId] = useState(1);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/operators")
-      .then((res) => {
-        // Add a default status (for now) until Flask provides one
-        const operatorsWithStatus = res.data.map(op => ({
-          ...op,
-          status: "not_trained"  // or fetch from backend later
-        }));
-        setOperators(operatorsWithStatus);
+    axios
+      .get(`http://localhost:5000/operators`, {
+        params: { training_id: trainingId }
       })
-      .catch((err) => console.error("API error:", err));
-}, []);
+      .then((res) => {
+        const withStatus = res.data.map((op) => ({
+          ...op,
+          status: op.status || "not_trained",
+        }));
+        setOperators(withStatus);
+      });
+  }, [trainingId]); // if trainingId ever changes, re-fetch
+
+  const addOperator = (newop) => {
+    const name = typeof newop === "string" ? newop : newop.name;
+    axios
+      .post("http://localhost:5000/operators", { name })
+      .then(() => {
+        return axios.get("http://localhost:5000/operators", {
+          params: { training_id: trainingId },
+        });
+      })
+      .then((res) => {
+        const withStatus = res.data.map((op) => ({
+          ...op,
+          status: op.status || "not_trained",
+        }));
+        setOperators(withStatus);
+      })
+      .catch((err) => console.error("❌ Error adding operator", err));
+  };
+
+  const moveOperator = (operator, newStatus) => {
+    if (operator.status === newStatus) return;
+
+    setOperators((prev) => {
+      const updated = prev.map((op) =>
+        op.id === operator.id ? { ...op, status: newStatus } : op
+      );
+      console.log("✅ Updated operator list:", updated);
+      return updated;
+    });
+
+    axios
+      .patch(`http://localhost:5000/operators/${operator.id}/training/${trainingId}/status`, {
+        status: newStatus,
+      })
+      .then(() => console.log("✅ Status updated"))
+      .catch((err) => console.error("❌ Error updating status", err));
+  };
+
 
   return (
     <div style={{ display: "flex", gap: "20px" }}>
+      <button
+        onClick={() => setShowModal(true)}
+        style={{
+          marginBottom: "15px",
+          padding: "8px 12px",
+          backgroundColor: "#007bff",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        ➕ Add Operator
+      </button>
+
+      <AddOperator
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onAdd={addOperator}
+      />
+
       {categories.map((status) => (
-        <div
+        <Column
           key={status}
-          style={{
-            flex: 1,
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            background: "#f9f9f9",
-          }}
-        >
-          <h3>{displayNames[status]}</h3>
-          {operators
-            .filter((op) => op.status === status)
-            .map((op) => (
-              <OperatorCard key={op.id} operator={op} />
-            ))}
-        </div>
+          status={status}
+          displayName={displayNames[status]}
+          operators={operators.filter((op) => op.status === status)}
+          onDrop={(operator) => moveOperator(operator, status)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Column({ status, displayName, operators, onDrop }) {
+  const [{ isOver }, dropRef] = useDrop(() => ({
+    accept: "OPERATOR",
+    drop: (item) => onDrop(item),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  }));
+
+  return (
+    <div
+      ref={dropRef}
+      style={{
+        flex: 1,
+        minHeight: "300px",
+        padding: "10px",
+        border: "2px dashed #ccc",
+        background: isOver ? "#e6f7ff" : "#f9f9f9",
+        borderRadius: "8px",
+      }}
+    >
+      <h3>{displayName}</h3>
+      {operators.map((op) => (
+        <OperatorCard key={op.id} operator={op} />
       ))}
     </div>
   );
