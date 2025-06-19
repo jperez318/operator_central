@@ -3,6 +3,7 @@ import axios from "axios";
 import OperatorCard from "./OperatorCard";
 import { useDrop } from "react-dnd";
 import AddOperator from "./AddOperator";
+//import DeleteOperator from "./DeleteOperator";
 
 const categories = ["not_trained", "trained", "shadowed", "can_train"];
 const displayNames = {
@@ -14,7 +15,8 @@ const displayNames = {
 
 export default function TrainingBoard() {
   const [operators, setOperators] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  //const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [trainingId, setTrainingId] = useState(1);
 
   useEffect(() => {
@@ -50,6 +52,29 @@ export default function TrainingBoard() {
       .catch((err) => console.error("❌ Error adding operator", err));
   };
 
+  /*
+  const deleteOperator = (op) => {
+    const name = typeof op === "string" ? op : op.name;
+    axios
+      .delete("http://localhost:5000/operators", { name })
+      .then(() => {
+        return axios.get("http://localhost:5000/operators", {
+          params: { training_id: trainingId },
+        });
+      })
+      /*
+      .then((res) => {
+        const withStatus = res.data.map((op) => ({
+          ...op,
+          status: op.status || "not_trained",
+        }));
+        setOperators(withStatus);
+      })
+      
+      .catch((err) => console.error("❌ Error adding operator", err));
+  };
+  */
+
   const moveOperator = (operator, newStatus) => {
     if (operator.status === newStatus) return;
 
@@ -73,7 +98,7 @@ export default function TrainingBoard() {
   return (
     <div style={{ display: "flex", gap: "20px" }}>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={() => setShowAddModal(true)}
         style={{
           marginBottom: "15px",
           padding: "8px 12px",
@@ -88,11 +113,33 @@ export default function TrainingBoard() {
       </button>
 
       <AddOperator
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
         onAdd={addOperator}
       />
+      
+      {/*
+      <button
+        onClick={() => setShowDeleteModal(true)}
+        style={{
+          marginBottom: "15px",
+          padding: "8px 12px",
+          backgroundColor: "#007bff",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        ➕ Delete Operator
+      </button>
 
+      <DeleteOperator
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={deleteOperator}
+      />
+      */}
       {categories.map((status) => (
         <Column
           key={status}

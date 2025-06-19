@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+/*import React, { useState } from "react";
 
-export default function AddOperator({ isOpen, onClose, onAdd }) {
+export default function DeleteOperator({ isOpen, onClose, onDelete }) {
   const [name, setName] = useState("");
 
   const handleSubmit = async (e) => {
@@ -22,7 +22,7 @@ export default function AddOperator({ isOpen, onClose, onAdd }) {
   return (
     <div style={styles.backdrop}>
       <div style={styles.modal}>
-        <h2>Add Operator</h2>
+        <h2>Delete Operator</h2>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -36,7 +36,7 @@ export default function AddOperator({ isOpen, onClose, onAdd }) {
               Cancel
             </button>
             <button type="submit" style={styles.addBtn}>
-              Add
+              Delete
             </button>
           </div>
         </form>
@@ -90,3 +90,4 @@ const styles = {
     cursor: "pointer",
   },
 };
+*/
