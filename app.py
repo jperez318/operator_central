@@ -35,7 +35,13 @@ def add_operator():
     op = Operator(name=data["name"])
     db.session.add(op)
     db.session.commit()
-    
+
+    training = Training.query.get(1)
+    if not training:
+        training = Training(id=1, name="Default Training")
+        db.session.add(training)
+        db.session.commit()
+
     training_status = TrainingStatus(
         operator_id=op.id, training_id=1, status="not_trained"
     )
