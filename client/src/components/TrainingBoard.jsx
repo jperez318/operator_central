@@ -3,7 +3,7 @@ import axios from "axios";
 import OperatorCard from "./OperatorCard";
 import { useDrop } from "react-dnd";
 import AddOperator from "./AddOperator";
-//import DeleteOperator from "./DeleteOperator";
+import DeleteOperator from "./DeleteOperator";
 
 const categories = ["not_trained", "trained", "shadowed", "can_train"];
 const displayNames = {
@@ -16,7 +16,7 @@ const displayNames = {
 export default function TrainingBoard() {
   const [operators, setOperators] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  //const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [trainingId, setTrainingId] = useState(1);
 
   useEffect(() => {
@@ -52,28 +52,26 @@ export default function TrainingBoard() {
       .catch((err) => console.error("❌ Error adding operator", err));
   };
 
-  /*
+
   const deleteOperator = (op) => {
     const name = typeof op === "string" ? op : op.name;
     axios
-      .delete("http://localhost:5000/operators", { name })
+      .delete("http://localhost:5000/operators", { params: { name }})
       .then(() => {
         return axios.get("http://localhost:5000/operators", {
           params: { training_id: trainingId },
         });
       })
-      /*
       .then((res) => {
         const withStatus = res.data.map((op) => ({
           ...op,
           status: op.status || "not_trained",
         }));
         setOperators(withStatus);
-      })
-      
+      })   
       .catch((err) => console.error("❌ Error adding operator", err));
   };
-  */
+  
 
   const moveOperator = (operator, newStatus) => {
     if (operator.status === newStatus) return;
@@ -118,7 +116,7 @@ export default function TrainingBoard() {
         onAdd={addOperator}
       />
       
-      {/*
+      
       <button
         onClick={() => setShowDeleteModal(true)}
         style={{
@@ -131,7 +129,7 @@ export default function TrainingBoard() {
           cursor: "pointer",
         }}
       >
-        ➕ Delete Operator
+        🗑️ Delete Operator
       </button>
 
       <DeleteOperator
@@ -139,7 +137,7 @@ export default function TrainingBoard() {
         onClose={() => setShowDeleteModal(false)}
         onDelete={deleteOperator}
       />
-      */}
+      
       {categories.map((status) => (
         <Column
           key={status}

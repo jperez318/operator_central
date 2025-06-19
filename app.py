@@ -55,12 +55,18 @@ def add_operator():
     })
 
 
-@app.route("/operators/<int:id>", methods=["DELETE"])
-def delete_operator(id):
-    op = Operator.query.get_or_404(id)
-    db.session.delete(op)
+@app.route("/operators", methods=["DELETE"])
+def delete_operator():
+    name = request.args.get("name")
+    if not name:
+        return jsonify({"error": "A name is Required"}), 400
+    operators = Operator.query.filter(Operator.name == name).all()
+    if not operators:
+        return jsonify({"error": "There are no operators with that name"}), 404
+    for op in operators:
+        db.session.delete(op)
     db.session.commit()
-    return jsonify({"message": "Deleted"})
+    return jsonify({"message": f"Deleted operator(s) with name {name}"})
 
 @app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
 def update_status(operator_id, training_id):

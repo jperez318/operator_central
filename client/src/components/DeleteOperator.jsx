@@ -1,4 +1,4 @@
-/*import React, { useState } from "react";
+import React, { useState } from "react";
 
 export default function DeleteOperator({ isOpen, onClose, onDelete }) {
   const [name, setName] = useState("");
@@ -8,12 +8,12 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
     if (!name.trim()) return;
 
     try {
-        onAdd(name.trim());  // Pass the full operator (including ID/status) back to parent
+        await onDelete(name.trim());
         setName("");
         onClose();
     } catch (err) {
-        console.error("Failed to add operator:", err);
-        alert("Error adding operator. See console.");
+        console.error("Failed to delete operator:", err);
+        alert("Error delete operator. See console.");
     }
     };
 
@@ -90,4 +90,3 @@ const styles = {
     cursor: "pointer",
   },
 };
-*/
