@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function DeleteOperator({ isOpen, onClose, onDelete }) {
+export default function DeleteTraining({ isOpen, onClose, onDelete }) {
   const [name, setName] = useState("");
 
   const handleSubmit = async (e) => {
@@ -12,8 +12,8 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
         setName("");
         onClose();
     } catch (err) {
-        console.error("Failed to delete operator:", err);
-        alert("Error deleting operator. See console.");
+        console.error("Failed to delete training:", err);
+        alert("Error deleting training. See console.");
     }
     };
 
@@ -22,7 +22,7 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
   return (
     <div style={styles.backdrop}>
       <div style={styles.modal}>
-        <h2>Delete Operator</h2>
+        <h2>Delete Training</h2>
         <form onSubmit={handleSubmit}>
           <input
             type="text"

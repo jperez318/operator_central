@@ -26,7 +26,7 @@ export default function AddOperator({ isOpen, onClose, onAdd }) {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Enter name"
+            placeholder="Enter Operator name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={styles.input}

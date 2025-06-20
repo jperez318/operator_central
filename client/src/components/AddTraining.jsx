@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function DeleteOperator({ isOpen, onClose, onDelete }) {
+export default function AddTraining({ isOpen, onClose, onAdd }) {
   const [name, setName] = useState("");
 
   const handleSubmit = async (e) => {
@@ -8,12 +8,12 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
     if (!name.trim()) return;
 
     try {
-        await onDelete(name.trim());
+        onAdd(name.trim());  // Pass the full operator (including ID/status) back to parent
         setName("");
         onClose();
     } catch (err) {
-        console.error("Failed to delete operator:", err);
-        alert("Error deleting operator. See console.");
+        console.error("Failed to add training:", err);
+        alert("Error adding training. See console.");
     }
     };
 
@@ -22,11 +22,11 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
   return (
     <div style={styles.backdrop}>
       <div style={styles.modal}>
-        <h2>Delete Operator</h2>
+        <h2>Add Training</h2>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Enter name"
+            placeholder="Enter Training name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={styles.input}
@@ -36,7 +36,7 @@ export default function DeleteOperator({ isOpen, onClose, onDelete }) {
               Cancel
             </button>
             <button type="submit" style={styles.addBtn}>
-              Delete
+              Add
             </button>
           </div>
         </form>

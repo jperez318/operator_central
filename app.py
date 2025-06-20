@@ -36,16 +36,18 @@ def add_operator():
     db.session.add(op)
     db.session.commit()
 
-    training = Training.query.get(1)
-    if not training:
-        training = Training(id=1, name="Default Training")
-        db.session.add(training)
+    trainings = Training.query.all()
+    if not trainings:
+        default_training = Training(name="Default Training")
+        db.session.add(default_training)
         db.session.commit()
+        trainings = [default_training]
 
-    training_status = TrainingStatus(
-        operator_id=op.id, training_id=1, status="not_trained"
-    )
-    db.session.add(training_status)
+    for t in trainings:
+        training_status = TrainingStatus(
+            operator_id=op.id, training_id = t.id, status="not_trained"
+        )
+        db.session.add(training_status)
     db.session.commit()
 
     return jsonify({
@@ -67,6 +69,46 @@ def delete_operator():
         db.session.delete(op)
     db.session.commit()
     return jsonify({"message": f"Deleted operator(s) with name {name}"})
+
+
+@app.route("/trainings", methods=["POST"])
+def add_training():
+    data = request.json
+    name = data.get("name")
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+    
+    training = Training(name=name)
+    db.session.add(training)
+    db.session.commit()
+
+    operators = Operator.query.all()
+    if not operators: return
+    for op in operators:
+        new_status = TrainingStatus(operator_id=op.id, training_id=training.id, status= "not_trained")
+        db.session.add(new_status)
+    db.session.commit()
+    
+    return jsonify({"id": training.id, "name": training.name})  
+
+@app.route("/trainings", methods=["DELETE"])
+def delete_training():
+    name = request.args.get("name")
+    if not name:
+        return jsonify({"error": "A name is Required"}), 400
+    training = Training.query.filter(Training.name == name).all()
+    if not training:
+        return jsonify({"error": "There are no training with that name"}), 404
+    for t in training:
+        db.session.delete(t)
+    db.session.commit()
+    return jsonify({"message": f"Deleted training with name {name}"})
+    
+@app.route("/trainings", methods=["GET"])
+def get_trainings():
+    trainings = Training.query.all()
+    return jsonify([{"id": t.id, "name": t.name} for t in trainings])  
+
 
 @app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
 def update_status(operator_id, training_id):
