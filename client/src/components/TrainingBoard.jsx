@@ -6,22 +6,24 @@ import AddOperator from "./AddOperator";
 import DeleteOperator from "./DeleteOperator";
 import AddTraining from "./AddTraining";
 import DeleteTraining from "./DeleteTraining";
+import TrainingRow from "./TrainingRow";
 
-const categories = ["not_trained", "trained", "shadowed", "can_train"];
+const categories = ["not_trained", "trained", "shadowed", "ran_in_workshop", "can_train"];
 const displayNames = {
   not_trained: "Not Trained",
   trained: "Trained",
+  ran_in_workshop: "Ran in Workshop",
   shadowed: "Shadowed",
   can_train: "Can Train",
 };
 
 export default function TrainingBoard() {
   const [operatorsByTraining, setOperatorsByTraining] = useState({});
-    const [showAddOperatorModal, setShowAddOperatorModal] = useState(false);
-    const [showDeleteOperatorModal, setShowDeleteOperatorModal] = useState(false);
-    const [showAddTrainingModal, setShowAddTrainingModal] = useState(false);
-    const [showDeleteTrainingModal, setShowDeleteTrainingModal] = useState(false);
-    const [trainings, setTrainings] = useState([]);
+  const [showAddOperatorModal, setShowAddOperatorModal] = useState(false);
+  const [showDeleteOperatorModal, setShowDeleteOperatorModal] = useState(false);
+  const [showAddTrainingModal, setShowAddTrainingModal] = useState(false);
+  const [showDeleteTrainingModal, setShowDeleteTrainingModal] = useState(false);
+  const [trainings, setTrainings] = useState([]);
 
   const fetchTrainings = () => {
     axios.get("http://localhost:5000/trainings").then((res) => {
@@ -146,6 +148,25 @@ export default function TrainingBoard() {
       });
   };
 
+  const moveTraining = (fromIndex, toIndex) => {
+    setTrainings((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+
+      const reordered = updated.map((t, i) => ({
+        id: t.id,
+        position: i
+      }));
+
+      axios.patch("http://localhost:5000/trainings/reorder", reordered)
+        .then(() => console.log("✅ Order saved"))
+        .catch((err) => console.error("❌ Failed to save order", err));
+
+      return updated;
+    });
+  };
+
   return (
       <div>
         <div style={{ display: "flex", gap: "20px" }}>
@@ -202,9 +223,13 @@ export default function TrainingBoard() {
           />
         </div>
 
-        {trainings.map((training) => (
-          <div key={training.id}>
-            <h2>{training.name}</h2>
+       {trainings.map((training, index) => (
+          <TrainingRow
+            key={training.id}
+            training={training}
+            index={index}
+            moveTraining={moveTraining}
+          >
             <div style={{ display: "flex", gap: "10px" }}>
               {categories.map((status) => (
                 <Column
@@ -220,7 +245,7 @@ export default function TrainingBoard() {
                 />
               ))}
             </div>
-          </div>
+          </TrainingRow>
         ))}
       </div>
     );

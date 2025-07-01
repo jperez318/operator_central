@@ -88,7 +88,7 @@ def add_training():
         new_status = TrainingStatus(operator_id=op.id, training_id=training.id, status= "not_trained")
         db.session.add(new_status)
     db.session.commit()
-    
+
     return jsonify({"id": training.id, "name": training.name})  
 
 @app.route("/trainings", methods=["DELETE"])
@@ -106,8 +106,18 @@ def delete_training():
     
 @app.route("/trainings", methods=["GET"])
 def get_trainings():
-    trainings = Training.query.all()
-    return jsonify([{"id": t.id, "name": t.name} for t in trainings])  
+    trainings = Training.query.order_by(Training.position).all()
+    return jsonify([{"id": t.id, "name": t.name, "position": t.position} for t in trainings])
+
+@app.route("/trainings/reorder", methods=["PATCH"])
+def reorder_trainings():
+    data = request.get_json()
+    for item in data:
+        training = Training.query.get(item["id"])
+        if training:
+            training.position = item["position"]
+    db.session.commit()
+    return jsonify({"status": "success"}), 200
 
 
 @app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
@@ -115,7 +125,7 @@ def update_status(operator_id, training_id):
     data = request.json
     new_status = data.get("status")
 
-    if new_status not in ["not_trained", "trained", "shadowed", "can_train"]:
+    if new_status not in ["not_trained", "trained", "shadowed", "ran_in_workshop", "can_train"]:
         return jsonify({"error": "Invalid status"}), 400
 
     training_status = TrainingStatus.query.filter_by(operator_id=operator_id, training_id=training_id).first()
