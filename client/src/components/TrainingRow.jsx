@@ -2,18 +2,21 @@ import React, { useRef, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 
-const TrainingRow = ({ training, index, moveTraining, children }) => {
+const TrainingRow = ({ training, index, moveTraining, children, isLocked }) => {
   const ref = useRef(null);
+  const dragRef = useRef(null)
 
   const [, drop] = useDrop({
     accept: "TRAINING_ROW",
     drop(item) {
+        if (isLocked) return;
         if (item.index !== index) {
         moveTraining(item.index, index);
         item.index = index;
         }
     },
     hover(_, monitor) {
+        if (isLocked) return;
         const clientOffset = monitor.getClientOffset();
         if (!clientOffset) return;
 
@@ -33,6 +36,7 @@ const TrainingRow = ({ training, index, moveTraining, children }) => {
   const [{ isDragging }, drag, preview] = useDrag({
     type: "TRAINING_ROW",
     item: { id: training.id, index },
+    canDrag: !isLocked,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -42,7 +46,8 @@ const TrainingRow = ({ training, index, moveTraining, children }) => {
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
 
-  drag(drop(ref));
+  drop(ref);
+  drag(dragRef)
 
   return (
     <div
@@ -55,7 +60,13 @@ const TrainingRow = ({ training, index, moveTraining, children }) => {
         background: "white",
       }}
     >
-      <h2 style={{ cursor: "move" }}>{training.name}</h2>
+      <h2
+        ref={dragRef}
+        style={{ cursor: isLocked ? "default" : "move", userSelect: "none" }}
+        title={isLocked ? "Unlock to drag training" : "Drag training"}
+      >
+        {training.name}
+      </h2>
       {children}
     </div>
   );

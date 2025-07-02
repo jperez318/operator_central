@@ -24,6 +24,7 @@ export default function TrainingBoard() {
   const [showAddTrainingModal, setShowAddTrainingModal] = useState(false);
   const [showDeleteTrainingModal, setShowDeleteTrainingModal] = useState(false);
   const [trainings, setTrainings] = useState([]);
+  const [isLocked, setIsLocked] = useState(true);
 
   const fetchTrainings = () => {
     axios.get("http://localhost:5000/trainings").then((res) => {
@@ -216,6 +217,18 @@ export default function TrainingBoard() {
             🗑️ Delete Training
           </button>
 
+          <button
+            onClick={() => setIsLocked((prev) => !prev)}
+            style={{
+              backgroundColor: isLocked ? "green" : "red",
+              color: "white",
+              padding: 8,
+              marginLeft: 10,
+            }}
+          >
+            {isLocked ? "Unlock Drag & Drop" : "Lock Drag & Drop"}
+          </button>
+
           <AddOperator
             isOpen={showAddOperatorModal}
             onClose={() => setShowAddOperatorModal(false)}
@@ -247,6 +260,7 @@ export default function TrainingBoard() {
             training={training}
             index={index}
             moveTraining={moveTraining}
+            isLocked={isLocked}
           >
             <div style={{ display: "flex", gap: "10px" }}>
               {categories.map((status) => (
@@ -254,6 +268,7 @@ export default function TrainingBoard() {
                   key={status}
                   status={status}
                   displayName={displayNames[status]}
+                  isLocked={isLocked}
                   operators={
                     operatorsByTraining[training.id]?.filter(
                       (op) => op.status === status
@@ -269,7 +284,7 @@ export default function TrainingBoard() {
     );
   }
 
-function Column({ status, displayName, operators, onDrop }) {
+function Column({ status, displayName, isLocked, operators, onDrop }) {
   const [{ isOver }, dropRef] = useDrop(() => ({
     accept: "OPERATOR",
     drop: (item) => onDrop(item),
@@ -292,7 +307,7 @@ function Column({ status, displayName, operators, onDrop }) {
     >
       <h3>{displayName}</h3>
       {operators.map((op) => (
-        <OperatorCard key={op.id} operator={op} />
+        <OperatorCard key={op.id} operator={op} isLocked={isLocked} />
       ))}
     </div>
   );

@@ -1,14 +1,19 @@
 import React from "react";
 import { useDrag } from "react-dnd";
 
-export default function OperatorCard({ operator }) {
-  const [{ isDragging }, dragRef] = useDrag(() => ({
+export default function OperatorCard({ operator, isLocked }) {
+  const [{ isDragging }, dragRef] = useDrag(() => {
+  return {
     type: "OPERATOR",
     item: { ...operator },
+    canDrag: () => {
+      return !isLocked;
+    },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
-  }));
+  };
+}, [operator.id, isLocked]);
 
   return (
     <div
