@@ -32,27 +32,39 @@ export default function TrainingBoard() {
   };
 
   useEffect(() => {
-    fetchTrainings();
-  }, []);
+    document.body.style.backgroundColor = "#24477F";
+    document.body.style.margin = "0";
+    const fetchAll = async () => {
+      try {
+        const trainingsRes = await axios.get("http://localhost:5000/trainings");
+        const trainingList = trainingsRes.data;
+        setTrainings(trainingList);
 
-  useEffect(() => {
-    trainings.forEach((training) => {
-      axios
-        .get(`http://localhost:5000/operators`, {
-          params: { training_id: training.id },
-        })
-        .then((res) => {
-          const withStatus = res.data.map((op) => ({
+        const responses = await Promise.all(
+          trainingList.map((training) =>
+            axios.get("http://localhost:5000/operators", {
+              params: { training_id: training.id },
+            })
+          )
+        );
+
+        const updatedOperators = {};
+        trainingList.forEach((training, i) => {
+          const ops = responses[i].data.map((op) => ({
             ...op,
             status: op.status || "not_trained",
           }));
-          setOperatorsByTraining((prev) => ({
-            ...prev,
-            [training.id]: withStatus,
-          }));
+          updatedOperators[training.id] = ops;
         });
-    });
-  }, [trainings]);
+
+        setOperatorsByTraining(updatedOperators);
+      } catch (err) {
+        console.error("❌ Error loading trainings/operators", err);
+      }
+    };
+
+    fetchAll();
+}, []);
 
   const addOperator = (newop) => {
     const name = typeof newop === "string" ? newop : newop.name;
@@ -149,6 +161,8 @@ export default function TrainingBoard() {
   };
 
   const moveTraining = (fromIndex, toIndex) => {
+    const scrollY = window.scrollY;
+
     setTrainings((prev) => {
       const updated = [...prev];
       const [moved] = updated.splice(fromIndex, 1);
@@ -165,6 +179,10 @@ export default function TrainingBoard() {
 
       return updated;
     });
+
+    setTimeout(() => {
+      window.scrollTo({ top: scrollY, behavior: "auto" });
+    }, 0);
   };
 
   return (

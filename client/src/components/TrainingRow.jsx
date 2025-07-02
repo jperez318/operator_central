@@ -1,25 +1,46 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
 
 const TrainingRow = ({ training, index, moveTraining, children }) => {
   const ref = useRef(null);
 
   const [, drop] = useDrop({
     accept: "TRAINING_ROW",
-    hover(item) {
-      if (item.index === index) return;
-      moveTraining(item.index, index);
-      item.index = index;
+    drop(item) {
+        if (item.index !== index) {
+        moveTraining(item.index, index);
+        item.index = index;
+        }
     },
+    hover(_, monitor) {
+        const clientOffset = monitor.getClientOffset();
+        if (!clientOffset) return;
+
+        const threshold = 100;
+        const scrollSpeed = 15;
+        const { y } = clientOffset;
+        const viewportHeight = window.innerHeight;
+
+        if (y < threshold) {
+        window.scrollBy({ top: -scrollSpeed, behavior: "auto" });
+        } else if (y > viewportHeight - threshold) {
+        window.scrollBy({ top: scrollSpeed, behavior: "auto" });
+        }
+    }
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag, preview] = useDrag({
     type: "TRAINING_ROW",
     item: { id: training.id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
 
   drag(drop(ref));
 
