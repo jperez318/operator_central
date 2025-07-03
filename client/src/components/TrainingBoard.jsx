@@ -16,6 +16,13 @@ const displayNames = {
   shadowed: "Shadowed",
   can_train: "Can Train",
 };
+const colors = {
+  not_trained: "#E68F96",       
+  trained: "#FAA433",           
+  shadowed: "#F4DC27",          // yellow
+  ran_in_workshop: "#62DB28",   // blue
+  can_train: "#73B7F7",         // purple
+};
 
 export default function TrainingBoard() {
   const [operatorsByTraining, setOperatorsByTraining] = useState({});
@@ -33,7 +40,7 @@ export default function TrainingBoard() {
   };
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#24477F";
+    document.body.style.backgroundColor = "#9c9b9b";
     document.body.style.margin = "0";
     const fetchAll = async () => {
       try {
@@ -187,71 +194,76 @@ export default function TrainingBoard() {
   };
 
   return (
-      <div>
-        <div style={{ display: "flex", gap: "20px" }}>
-          <button
-            onClick={() => setShowAddOperatorModal(true)}
-            style={{ backgroundColor: "#007bff", color: "white", padding: 8 }}
-          >
-            ➕ Add Operator
-          </button>
+      <div style={{padding: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
+          <h1 style={{ color: "white", marginBottom: "20px" }}>Operator Skills Matrix</h1>
 
-          <button
-            onClick={() => setShowDeleteOperatorModal(true)}
-            style={{ backgroundColor: "#007bff", color: "white", padding: 8 }}
-          >
-            🗑️ Delete Operator
-          </button>
+          <div style={{ display: "flex", gap: "20px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+            <button
+              onClick={() => setShowAddOperatorModal(true)}
+              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+            >
+              ➕ Add Operator
+            </button>
 
-          <button
-            onClick={() => setShowAddTrainingModal(true)}
-            style={{ backgroundColor: "#007bff", color: "white", padding: 8 }}
-          >
-            ➕ Add Training
-          </button>
+            <button
+              onClick={() => setShowDeleteOperatorModal(true)}
+              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+            >
+              🗑️ Delete Operator
+            </button>
 
-          <button
-            onClick={() => setShowDeleteTrainingModal(true)}
-            style={{ backgroundColor: "#007bff", color: "white", padding: 8 }}
-          >
-            🗑️ Delete Training
-          </button>
+            <button
+              onClick={() => setShowAddTrainingModal(true)}
+              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: 'white', padding: 8 }}
+            >
+              ➕ Add Training
+            </button>
 
-          <button
-            onClick={() => setIsLocked((prev) => !prev)}
-            style={{
-              backgroundColor: isLocked ? "green" : "red",
-              color: "white",
-              padding: 8,
-              marginLeft: 10,
-            }}
-          >
-            {isLocked ? "Unlock Drag & Drop" : "Lock Drag & Drop"}
-          </button>
+            <button
+              onClick={() => setShowDeleteTrainingModal(true)}
+              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+            >
+              🗑️ Delete Training
+            </button>
 
-          <AddOperator
-            isOpen={showAddOperatorModal}
-            onClose={() => setShowAddOperatorModal(false)}
-            onAdd={addOperator}
-          />
+            <button
+              onClick={() => setIsLocked((prev) => !prev)}
+              style={{
+                backgroundColor: isLocked ? "green" : "red",
+                color: "white",
+                borderRadius: "10px",
+                padding: 8,
+                marginLeft: 10,
+              }}
+            >
+              {isLocked ? "Unlock Drag & Drop" : "Lock Drag & Drop"}
+            </button>
 
-          <DeleteOperator
-            isOpen={showDeleteOperatorModal}
-            onClose={() => setShowDeleteOperatorModal(false)}
-            onDelete={deleteOperator}
-          />
+            <AddOperator
+              isOpen={showAddOperatorModal}
+              onClose={() => setShowAddOperatorModal(false)}
+              onAdd={addOperator}
+            />
 
-          <AddTraining
-            isOpen={showAddTrainingModal}
-            onClose={() => setShowAddTrainingModal(false)}
-            onAdd={addTraining}
-          />
+            <DeleteOperator
+              isOpen={showDeleteOperatorModal}
+              onClose={() => setShowDeleteOperatorModal(false)}
+              onDelete={deleteOperator}
+            />
 
-          <DeleteTraining
-            isOpen={showDeleteTrainingModal}
-            onClose={() => setShowDeleteTrainingModal(false)}
-            onDelete={deleteTraining}
-          />
+            <AddTraining
+              isOpen={showAddTrainingModal}
+              onClose={() => setShowAddTrainingModal(false)}
+              onAdd={addTraining}
+            />
+
+            <DeleteTraining
+              isOpen={showDeleteTrainingModal}
+              onClose={() => setShowDeleteTrainingModal(false)}
+              onDelete={deleteTraining}
+            />
+          </div>
         </div>
 
        {trainings.map((training, index) => (
@@ -293,6 +305,9 @@ function Column({ status, displayName, isLocked, operators, onDrop }) {
     }),
   }));
 
+  const baseColor = colors[status] || "#f9f9f9";
+  const background = isOver ? "#e6f7ff" : baseColor;
+
   return (
     <div
       ref={dropRef}
@@ -301,7 +316,7 @@ function Column({ status, displayName, isLocked, operators, onDrop }) {
         minHeight: "300px",
         padding: "10px",
         border: "2px dashed #ccc",
-        background: isOver ? "#e6f7ff" : "#f9f9f9",
+        background,
         borderRadius: "8px",
       }}
     >

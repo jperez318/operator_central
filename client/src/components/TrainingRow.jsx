@@ -54,10 +54,12 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked }) => {
       ref={ref}
       style={{
         opacity: isDragging ? 0.4 : 1,
-        border: "1px solid lightgray",
-        padding: 8,
+        borderRadius: "16px",           // ✅ Rounded corners
+        padding: 16,
+        marginBottom: 20,
+        background: "#24477F",          // ✅ McKinsey Blue
+        color: "black",                 // ✅ Text color for contrast
         marginBottom: 10,
-        background: "white",
       }}
     >
       <h2
