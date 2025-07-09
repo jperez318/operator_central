@@ -119,6 +119,26 @@ def reorder_trainings():
     db.session.commit()
     return jsonify({"status": "success"}), 200
 
+@app.route("/trainings/<int:training_id>/rename", methods=["PATCH"])
+def rename_training(training_id):
+    data = request.get_json()
+    new_name = data.get("name")
+    if not new_name:
+        return jsonify({"error": "Training name is required"}), 400
+
+    existing = Training.query.filter(Training.name == new_name, Training.id != training_id).first()
+    if existing:
+        return jsonify({"error": "Training name already exists"}), 409
+
+    training = Training.query.get(training_id)
+    if not training:
+        return jsonify({"error": "Training not found"}), 404
+
+    training.name = new_name
+    db.session.commit()
+
+    return jsonify({"message": "Training renamed successfully"})
+
 
 @app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
 def update_status(operator_id, training_id):

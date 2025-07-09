@@ -1,36 +1,43 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 
-const TrainingRow = ({ training, index, moveTraining, children, isLocked }) => {
+const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRename }) => {
   const ref = useRef(null);
-  const dragRef = useRef(null)
+  const dragRef = useRef(null);
+
+  const [editing, setEditing] = useState(false);
+  const [newName, setNewName] = useState(training.name);
+
+  useEffect(() => {
+    setNewName(training.name);
+  }, [training.name]);
 
   const [, drop] = useDrop({
     accept: "TRAINING_ROW",
     drop(item) {
-        if (isLocked) return;
-        if (item.index !== index) {
+      if (isLocked) return;
+      if (item.index !== index) {
         moveTraining(item.index, index);
         item.index = index;
-        }
+      }
     },
     hover(_, monitor) {
-        if (isLocked) return;
-        const clientOffset = monitor.getClientOffset();
-        if (!clientOffset) return;
+      if (isLocked) return;
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
 
-        const threshold = 100;
-        const scrollSpeed = 15;
-        const { y } = clientOffset;
-        const viewportHeight = window.innerHeight;
+      const threshold = 100;
+      const scrollSpeed = 15;
+      const { y } = clientOffset;
+      const viewportHeight = window.innerHeight;
 
-        if (y < threshold) {
+      if (y < threshold) {
         window.scrollBy({ top: -scrollSpeed, behavior: "auto" });
-        } else if (y > viewportHeight - threshold) {
+      } else if (y > viewportHeight - threshold) {
         window.scrollBy({ top: scrollSpeed, behavior: "auto" });
-        }
-    }
+      }
+    },
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
@@ -47,28 +54,72 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked }) => {
   }, [preview]);
 
   drop(ref);
-  drag(dragRef)
+  drag(dragRef);
+
+  const finishRename = () => {
+    const trimmed = newName.trim();
+
+    if (!editing || trimmed === training.name) {
+        setEditing(false);
+        return;
+    }
+
+    setEditing(false);
+
+    if (onRename) {
+        onRename(training.id, trimmed, (errorMessage) => {
+        alert(errorMessage);
+        setNewName(training.name);
+        setEditing(false);
+        });
+    }
+  };
 
   return (
     <div
       ref={ref}
       style={{
         opacity: isDragging ? 0.4 : 1,
-        borderRadius: "16px",           // ✅ Rounded corners
+        borderRadius: "16px",
         padding: 16,
         marginBottom: 20,
-        background: "#24477F",          // ✅ McKinsey Blue
-        color: "black",                 // ✅ Text color for contrast
-        marginBottom: 10,
+        background: "#24477F",
+        color: "black",
       }}
     >
-      <h2
-        ref={dragRef}
-        style={{ cursor: isLocked ? "default" : "move", userSelect: "none" }}
-        title={isLocked ? "Unlock to drag training" : "Drag training"}
-      >
-        {training.name}
-      </h2>
+      {editing ? (
+        <input
+          ref={dragRef}
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onBlur={finishRename}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") finishRename();
+            if (e.key === "Escape") {
+              setNewName(training.name);
+              setEditing(false);
+            }
+          }}
+          autoFocus
+          style={{
+            fontSize: "1.5em",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            border: "1px solid #ccc",
+            backgroundColor: "white",
+            width: "100%",
+          }}
+        />
+      ) : (
+        <h2
+          ref={dragRef}
+          style={{ cursor: isLocked ? "default" : "move", userSelect: "none", margin: 0 }}
+          title={isLocked ? "Unlock to drag training" : "Double-click to rename"}
+          onDoubleClick={() => setEditing(true)}
+        >
+          {training.name}
+        </h2>
+      )}
       {children}
     </div>
   );

@@ -193,6 +193,20 @@ export default function TrainingBoard() {
     }, 0);
   };
 
+  const renameTraining = (id, newName, onError) => {
+    axios
+      .patch(`http://localhost:5000/trainings/${id}/rename`, { name: newName })
+      .then(() => fetchTrainings())
+      .catch((err) => {
+        console.error("❌ Rename error", err);
+        if (err.response?.status === 409) {
+          onError?.("A training with that name already exists.");
+        } else {
+          onError?.("An error occurred while renaming.");
+        }
+      });
+  };
+
   return (
       <div style={{padding: "20px" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
@@ -273,6 +287,9 @@ export default function TrainingBoard() {
             index={index}
             moveTraining={moveTraining}
             isLocked={isLocked}
+            onRename={(id, newName, onError) => {
+              renameTraining(id, newName, onError);
+            }}
           >
             <div style={{ display: "flex", gap: "10px" }}>
               {categories.map((status) => (
