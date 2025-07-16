@@ -181,9 +181,18 @@ export default function TrainingBoard() {
         position: i
       }));
 
+      // Save the previous state for reverting if needed
+      const prevTrainings = prev;
+
       axios.patch("http://localhost:5000/trainings/reorder", reordered)
         .then(() => console.log("✅ Order saved"))
-        .catch((err) => console.error("❌ Failed to save order", err));
+        .catch((err) => {
+          // Show error message from backend if available
+          const msg = err.response?.data?.error || "❌ Failed to save order";
+          alert(msg);
+          // Revert to previous state
+          setTrainings(prevTrainings);
+        });
 
       return updated;
     });
@@ -207,6 +216,22 @@ export default function TrainingBoard() {
       });
   };
 
+  const switch_importance = (id) => {
+    // Optimistically update local state
+    setTrainings((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, important: !t.important } : t
+      )
+    );
+    axios
+      .patch(`http://localhost:5000/trainings/${id}/importance`)
+      .then(() => fetchTrainings())
+      .catch((err) => {
+        console.error("❌ Error switching importance", err);
+        alert("Error switching importance. See console.");
+      });
+  };
+  
   return (
       <div style={{padding: "20px" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
@@ -290,6 +315,7 @@ export default function TrainingBoard() {
             onRename={(id, newName, onError) => {
               renameTraining(id, newName, onError);
             }}
+            onSwitchImportance={switch_importance}
           >
             <div style={{ display: "flex", gap: "10px" }}>
               {categories.map((status) => (

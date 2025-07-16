@@ -3,9 +3,9 @@ import { useDrag } from "react-dnd";
 
 export default function OperatorCard({ operator, isLocked }) {
   const statusColors = {
-    not_trained: "#EFB5B9",   // red
-    trained: "#FBC176",       // green
-    shadowed: "#FBFB89",      // yellow
+    not_trained: "#EFB5B9",   
+    trained: "#FBC176",     
+    shadowed: "#FBFB89",    
     ran_in_workshop: "#A8F583", 
     can_train: "#A0D1FF",     
   };
@@ -29,12 +29,14 @@ const backgroundColor = statusColors[operator.status] || "#ffffff";
     <div
     ref={dragRef}
       style={{
+        display: "inline-block", // <-- Add this line
         opacity: isDragging ? 0.5 : 1,
-        padding: "10px",
-        margin: "5px 0",
+        padding: "5px",
+        margin: "5px 5px",
+        fontSize: "1.1em",
         background: backgroundColor,
         border: "1px solid #ddd",
-        borderRadius: "4px",
+        borderRadius: "10px",
         cursor: "move",
       }}
     >

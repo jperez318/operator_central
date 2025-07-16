@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 
-const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRename }) => {
+const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRename, onSwitchImportance }) => {
   const ref = useRef(null);
   const dragRef = useRef(null);
 
@@ -60,18 +60,18 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
     const trimmed = newName.trim();
 
     if (!editing || trimmed === training.name) {
-        setEditing(false);
-        return;
+      setEditing(false);
+      return;
     }
 
     setEditing(false);
 
     if (onRename) {
-        onRename(training.id, trimmed, (errorMessage) => {
+      onRename(training.id, trimmed, (errorMessage) => {
         alert(errorMessage);
         setNewName(training.name);
         setEditing(false);
-        });
+      });
     }
   };
 
@@ -79,14 +79,34 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
     <div
       ref={ref}
       style={{
-        opacity: isDragging ? 0.4 : 1,
+        opacity: training.important ? (isDragging ? 0.4 : 1) : 0.7,
         borderRadius: "16px",
         padding: 16,
         marginBottom: 20,
         background: "#24477F",
-        color: "black",
+        color: "white",
+        position: "relative", // Needed for positioning button
       }}
     >
+      {/* Importance Toggle Button */}
+      <button
+        onClick={() => onSwitchImportance(training.id)}
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+          backgroundColor: training.important ? "#3498db" : "#e74c3c", // blue or red
+          color: "white",
+          border: "none",
+          padding: "6px 10px",
+          borderRadius: "8px",
+          fontSize: "0.75rem",
+          cursor: "pointer",
+        }}
+      >
+        {training.important ? "Important" : "Not Important"}
+      </button>
+
       {editing ? (
         <input
           ref={dragRef}
@@ -107,7 +127,7 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
             borderRadius: "6px",
             border: "1px solid #ccc",
             backgroundColor: "white",
-            width: "100%",
+            width: "calc(100% - 100px)",
           }}
         />
       ) : (
@@ -120,7 +140,10 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
           {training.name}
         </h2>
       )}
-      {children}
+      <div style={{
+         color: "black",
+         marginTop: "10px" ,
+         }}>{children}</div>
     </div>
   );
 };

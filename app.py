@@ -78,6 +78,8 @@ def add_training():
     if not name:
         return jsonify({"error": "Name is required"}), 400
     
+    Training.query.update({Training.position: Training.position + 1})
+    
     training = Training(name=name)
     db.session.add(training)
     db.session.commit()
@@ -107,15 +109,66 @@ def delete_training():
 @app.route("/trainings", methods=["GET"])
 def get_trainings():
     trainings = Training.query.order_by(Training.position).all()
-    return jsonify([{"id": t.id, "name": t.name, "position": t.position} for t in trainings])
+    return jsonify([
+        {
+            "id": t.id,
+            "name": t.name,
+            "position": t.position,
+            "important": t.important
+        } for t in trainings
+    ])
+
+@app.route("/trainings/<int:training_id>/importance", methods=["PATCH"])
+def switch_importance(training_id):
+    training = Training.query.get(training_id)
+    if not training:
+        return jsonify({"error": "Training not found"}), 404
+    training.important = not training.important
+
+    # Get all trainings, important first, then by position
+    all_trainings = Training.query.order_by(Training.important.desc(), Training.position.asc()).all()
+
+    # Move the toggled training to the top of its new group
+    if training.important:
+        # Move to top of important
+        important_trainings = [t for t in all_trainings if t.important]
+        important_trainings.insert(0, important_trainings.pop(important_trainings.index(training)))
+        not_important_trainings = [t for t in all_trainings if not t.important]
+        new_order = important_trainings + not_important_trainings
+    else:
+        # Move to bottom of important (top of not important)
+        important_trainings = [t for t in all_trainings if t.important]
+        not_important_trainings = [t for t in all_trainings if not t.important]
+        not_important_trainings.insert(0, not_important_trainings.pop(not_important_trainings.index(training)))
+        new_order = important_trainings + not_important_trainings
+
+    # Reindex positions
+    for idx, t in enumerate(new_order):
+        t.position = idx
+
+    db.session.commit()
+    return jsonify({"status": "success"}), 200
 
 @app.route("/trainings/reorder", methods=["PATCH"])
 def reorder_trainings():
     data = request.get_json()
-    for item in data:
-        training = Training.query.get(item["id"])
-        if training:
-            training.position = item["position"]
+
+    # Build a dict of id -> position for the new order
+    id_to_position = {item["id"]: item["position"] for item in data}
+
+    # Get all trainings and their importance
+    trainings = Training.query.filter(Training.id.in_(id_to_position.keys())).all()
+    important_positions = [id_to_position[t.id] for t in trainings if t.important]
+    if important_positions:
+        max_important_position = max(important_positions)
+        # Disallow any not important training from being before (or at) the last important
+        for t in trainings:
+            if not t.important and id_to_position[t.id] <= max_important_position:
+                return jsonify({"error": "Cannot move an unimportant training in front of an important training."}), 400
+
+    # If valid, update positions
+    for t in trainings:
+        t.position = id_to_position[t.id]
     db.session.commit()
     return jsonify({"status": "success"}), 200
 
