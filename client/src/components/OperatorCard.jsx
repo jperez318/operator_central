@@ -23,6 +23,22 @@ export default function OperatorCard({ operator, isLocked }) {
   };
 }, [operator.id, isLocked]);
 
+function getSinceString(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now = new Date();
+
+  let months = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+  let days = now.getDate() - date.getDate();
+
+  if (days < 0) {
+    months -= 1;
+    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+  return `Since: ${date.toLocaleDateString()} (${months} months ${days} days ago)`;
+}
+
 const backgroundColor = statusColors[operator.status] || "#ffffff";
 
   return (
@@ -39,6 +55,7 @@ const backgroundColor = statusColors[operator.status] || "#ffffff";
         borderRadius: "10px",
         cursor: "move",
       }}
+      title={operator.date_assigned ? getSinceString(operator.date_assigned) : ""}
     >
       {operator.name}
     </div>

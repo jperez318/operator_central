@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import db, Operator, Training, TrainingStatus
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -24,7 +25,8 @@ def get_operators():
         results.append({
             "id": op.id,
             "name": op.name,
-            "status": status_record.status if status_record else None
+            "status": status_record.status if status_record else None,
+            "date_assigned": status_record.date_assigned.isoformat() if status_record and status_record.date_assigned else None
         })
 
     return jsonify(results)
@@ -203,10 +205,11 @@ def update_status(operator_id, training_id):
 
     training_status = TrainingStatus.query.filter_by(operator_id=operator_id, training_id=training_id).first()
     if not training_status:
-        training_status = TrainingStatus(operator_id=operator_id, training_id=training_id, status=new_status)
+        training_status = TrainingStatus(operator_id=operator_id, training_id=training_id, status=new_status, date_assigned=datetime.now())
         db.session.add(training_status)
     else:
         training_status.status = new_status
+        training_status.date_assigned = datetime.now()
 
     db.session.commit()
     return jsonify({"message": "Status updated"})

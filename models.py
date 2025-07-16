@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -32,6 +33,7 @@ class TrainingStatus(db.Model):
     operator_id = db.Column(db.Integer, db.ForeignKey('operators.id'), nullable=False)
     training_id = db.Column(db.Integer, db.ForeignKey('trainings.id'), nullable=False)
     status = db.Column(db.String(20), nullable=False)
+    date_assigned = db.Column(db.DateTime, default=datetime.now)
 
     __table_args__ = (
         db.UniqueConstraint('operator_id', 'training_id', name='_operator_training_uc'),
