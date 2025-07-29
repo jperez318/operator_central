@@ -76,24 +76,39 @@ def delete_operator():
 @app.route("/trainings", methods=["POST"])
 def add_training():
     data = request.json
+    print("DEBUG received data:", data)
     name = data.get("name")
+    num_operators = data.get("num_operators", "")
+    time_taken = data.get("time_taken", "")
+    line = data.get("line", "")
+    information = data.get("information", "")
+
     if not name:
         return jsonify({"error": "Name is required"}), 400
-    
+
     Training.query.update({Training.position: Training.position + 1})
-    
-    training = Training(name=name)
+
+    training = Training(
+        name=name,
+        num_operators=num_operators,
+        time_taken=time_taken,
+        line=line,
+        information=information,
+        position=0
+    )
     db.session.add(training)
     db.session.commit()
 
     operators = Operator.query.all()
-    if not operators: return
+    if not operators:
+        return jsonify({"id": training.id, "name": training.name})
+
     for op in operators:
-        new_status = TrainingStatus(operator_id=op.id, training_id=training.id, status= "not_trained")
+        new_status = TrainingStatus(operator_id=op.id, training_id=training.id, status="not_trained")
         db.session.add(new_status)
     db.session.commit()
 
-    return jsonify({"id": training.id, "name": training.name})  
+    return jsonify({"id": training.id, "name": training.name})
 
 @app.route("/trainings", methods=["DELETE"])
 def delete_training():
@@ -116,7 +131,11 @@ def get_trainings():
             "id": t.id,
             "name": t.name,
             "position": t.position,
-            "important": t.important
+            "important": t.important,
+            "num_operators": t.num_operators,
+            "time_taken": t.time_taken,
+            "line": t.line,
+            "information": t.information
         } for t in trainings
     ])
 
@@ -193,6 +212,20 @@ def rename_training(training_id):
     db.session.commit()
 
     return jsonify({"message": "Training renamed successfully"})
+
+@app.route("/trainings/<int:training_id>", methods=["PATCH"])
+def update_training(training_id):
+    data = request.json
+    training = Training.query.get(training_id)
+    if not training:
+        return jsonify({"error": "Training not found"}), 404
+
+    for field in ["num_operators", "time_taken", "line", "information"]:
+        if field in data:
+            setattr(training, field, data[field])
+
+    db.session.commit()
+    return jsonify({"message": "Training updated"})
 
 
 @app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])

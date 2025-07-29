@@ -20,6 +20,10 @@ class Training(db.Model):
     name = db.Column(db.String(100), nullable=False)
     position = db.Column(db.Integer, nullable=False, default=0)
     important = db.Column(db.Boolean, nullable=False, default=True)
+    num_operators = db.Column(db.String(10), default="")
+    time_taken = db.Column(db.String(50), default="")
+    line = db.Column(db.String(50), default="")
+    information = db.Column(db.Text, default="")
 
     training_statuses = db.relationship(
         'TrainingStatus',

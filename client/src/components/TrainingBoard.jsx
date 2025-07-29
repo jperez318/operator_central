@@ -19,9 +19,9 @@ const displayNames = {
 const colors = {
   not_trained: "#E68F96",       
   trained: "#FAA433",           
-  shadowed: "#F4DC27",          // yellow
-  ran_in_workshop: "#62DB28",   // blue
-  can_train: "#73B7F7",         // purple
+  shadowed: "#F4DC27",         
+  ran_in_workshop: "#62DB28",   
+  can_train: "#73B7F7",         
 };
 
 export default function TrainingBoard() {
@@ -148,15 +148,15 @@ export default function TrainingBoard() {
       .catch((err) => console.error("❌ Error updating status", err));
   };
 
-  const addTraining = (name) => {
-    axios
-      .post("http://localhost:5000/trainings", { name })
-      .then(() => fetchTrainings()) // Refresh list of trainings
-      .catch((err) => {
-        console.error("❌ Error adding training:", err);
-        alert("Error adding training. See console.");
-      });
-  };
+  const addTraining = (trainingData) => {
+  axios
+    .post("http://localhost:5000/trainings", trainingData)
+    .then(() => fetchTrainings())
+    .catch((err) => {
+      console.error("❌ Error adding training:", err);
+      alert("Error adding training. See console.");
+    });
+};
 
   const deleteTraining = (name) => {
     axios
@@ -229,6 +229,20 @@ export default function TrainingBoard() {
       .catch((err) => {
         console.error("❌ Error switching importance", err);
         alert("Error switching importance. See console.");
+      });
+  };
+
+  const handleTrainingFieldChange = (id, field, value) => {
+    setTrainings(prev =>
+      prev.map(t =>
+        t.id === id ? { ...t, [field]: value } : t
+      )
+    );
+
+    axios.patch(`http://localhost:5000/trainings/${id}`, { [field]: value })
+      .catch(err => {
+        alert("Failed to update training field.");
+        console.error(err);
       });
   };
   
@@ -316,6 +330,7 @@ export default function TrainingBoard() {
               renameTraining(id, newName, onError);
             }}
             onSwitchImportance={switch_importance}
+            onFieldChange={handleTrainingFieldChange}
           >
             <div style={{ display: "flex", gap: "10px" }}>
               {categories.map((status) => (

@@ -2,45 +2,91 @@ import React, { useState } from "react";
 
 export default function AddTraining({ isOpen, onClose, onAdd }) {
   const [name, setName] = useState("");
+  const [numOperators, setNumOperators] = useState("");
+  const [timeTaken, setTimeTaken] = useState("");
+  const [line, setLine] = useState("");
+  const [information, setInformation] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
-
-    try {
-        onAdd(name.trim());  // Pass the full operator (including ID/status) back to parent
-        setName("");
-        onClose();
-    } catch (err) {
-        console.error("Failed to add training:", err);
-        alert("Error adding training. See console.");
-    }
-    };
+    onAdd({
+      name,
+      num_operators: numOperators,
+      time_taken: timeTaken,
+      line,
+      information,
+    });
+    setName("");
+    setNumOperators("");
+    setTimeTaken("");
+    setLine("");
+    setInformation("");
+    onClose();
+  };
 
   if (!isOpen) return null;
 
-  return (
+    return (
     <div style={styles.backdrop}>
-      <div style={styles.modal}>
-        <h2>Add Training</h2>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={styles.modal}>
+        <h2 style={{ color: "#24477F", marginBottom: 16 }}>Add Training</h2>
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Name:
           <input
-            type="text"
-            placeholder="Enter Training name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
+            required
             style={styles.input}
           />
-          <div style={{ marginTop: "10px" }}>
-            <button type="button" onClick={onClose} style={styles.cancelBtn}>
-              Cancel
-            </button>
-            <button type="submit" style={styles.addBtn}>
-              Add
-            </button>
-          </div>
-        </form>
-      </div>
+        </label>
+        <label style={{ display: "block", marginBottom: 10 }}>
+          # Operators:
+          <input
+            value={numOperators}
+            onChange={e => {
+              if (/^[\d-]*$/.test(e.target.value)) setNumOperators(e.target.value);
+            }}
+            maxLength={5}
+            style={styles.input}
+            placeholder="e.g. 2-3"
+          />
+        </label>
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Time Taken:
+          <input
+            value={timeTaken}
+            onChange={e => setTimeTaken(e.target.value)}
+            style={styles.input}
+            placeholder="e.g. 1 hour"
+          />
+        </label>
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Line:
+          <input
+            value={line}
+            onChange={e => setLine(e.target.value)}
+            style={styles.input}
+            placeholder="e.g. Tealine"
+            />
+        </label>
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Information:
+          <textarea
+            value={information}
+            onChange={e => setInformation(e.target.value)}
+            style={{ ...styles.input, minHeight: 60, resize: "vertical" }}
+            placeholder="Any extra information..."
+          />
+        </label>
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 16 }}>
+          <button type="button" onClick={onClose} style={styles.cancelBtn}>
+            Cancel
+          </button>
+          <button type="submit" style={styles.addBtn}>
+            Add Training
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -2,12 +2,16 @@ import React, { useRef, useEffect, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 
-const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRename, onSwitchImportance }) => {
+const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRename, onSwitchImportance, onFieldChange }) => {
   const ref = useRef(null);
   const dragRef = useRef(null);
 
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState(training.name);
+  const [numOperators, setNumOperators] = useState(training.num_operators || "");
+  const [timeTaken, setTimeTaken] = useState(training.time_taken || "");
+  const [line, setLine] = useState(training.line || "");
+  const [information, setInformation] = useState(training.information || "");
 
   useEffect(() => {
     setNewName(training.name);
@@ -75,6 +79,14 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
     }
   };
 
+  const handleNumOperatorsChange = (e) => {
+    const value = e.target.value;
+    if (/^[\d-]*$/.test(value)) {
+      setNumOperators(value);
+      onFieldChange && onFieldChange(training.id, "num_operators", value);
+    }
+  };
+
   return (
     <div
       ref={ref}
@@ -85,7 +97,7 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
         marginBottom: 20,
         background: "#24477F",
         color: "white",
-        position: "relative", // Needed for positioning button
+        position: "relative",
       }}
     >
       {/* Importance Toggle Button */}
@@ -95,7 +107,7 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
           position: "absolute",
           top: 12,
           right: 12,
-          backgroundColor: training.important ? "#3498db" : "#e74c3c", // blue or red
+          backgroundColor: training.important ? "#3498db" : "#e74c3c",
           color: "white",
           border: "none",
           padding: "6px 10px",
@@ -107,7 +119,7 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
         {training.important ? "Important" : "Not Important"}
       </button>
 
-      {editing ? (
+        {editing ? (
         <input
           ref={dragRef}
           value={newName}
@@ -131,21 +143,32 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
           }}
         />
       ) : (
-        <h2
-          ref={dragRef}
-          style={{ cursor: isLocked ? "default" : "move", userSelect: "none", margin: 0 }}
-          title={isLocked ? "Unlock to drag training" : "Double-click to rename"}
-          onDoubleClick={() => setEditing(true)}
-        >
-          {training.name}
-        </h2>
+          <>
+          <h2
+            ref={dragRef}
+            style={{
+              cursor: isLocked ? "default" : "move",
+              userSelect: "none",
+              margin: 0,
+            }}
+            title={isLocked ? "Unlock to drag training" : "Double-click to rename"}
+            onDoubleClick={() => setEditing(true)}
+          >
+            {training.name}
+          </h2>
+          <div style={{ display: "flex", gap: "1em", marginTop: 8 }}>
+            <div># Operators: {training.num_operators}</div>
+            <div>Time Taken: {training.time_taken}</div>
+            <div>Line: {training.line}</div>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <strong>Information:</strong>
+            <div>{training.information}</div>
+          </div>
+        </>
       )}
-      <div style={{
-         color: "black",
-         marginTop: "10px" ,
-         }}>{children}</div>
+      <div style={{ color: "black", marginTop: "10px" }}>{children}</div>
     </div>
   );
-};
-
+}
 export default TrainingRow;
