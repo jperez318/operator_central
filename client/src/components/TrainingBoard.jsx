@@ -34,7 +34,7 @@ export default function TrainingBoard() {
   const [isLocked, setIsLocked] = useState(true);
 
   const fetchTrainings = () => {
-    axios.get("http://localhost:5000/trainings").then((res) => {
+    axios.get(`${process.env.REACT_APP_API_BASE}/trainings`).then((res) => {
       setTrainings(res.data);
     });
   };
@@ -44,13 +44,13 @@ export default function TrainingBoard() {
     document.body.style.margin = "0";
     const fetchAll = async () => {
       try {
-        const trainingsRes = await axios.get("http://localhost:5000/trainings");
+        const trainingsRes = await axios.get(`${process.env.REACT_APP_API_BASE}/trainings`);
         const trainingList = trainingsRes.data;
         setTrainings(trainingList);
 
         const responses = await Promise.all(
           trainingList.map((training) =>
-            axios.get("http://localhost:5000/operators", {
+            axios.get(`${process.env.REACT_APP_API_BASE}/operators`, {
               params: { training_id: training.id },
             })
           )
@@ -77,11 +77,11 @@ export default function TrainingBoard() {
   const addOperator = (newop) => {
     const name = typeof newop === "string" ? newop : newop.name;
     axios
-      .post("http://localhost:5000/operators", { name })
+      .post(`${process.env.REACT_APP_API_BASE}/operators`, { name })
       .then(() => {
         trainings.forEach((training) => {
           axios
-            .get("http://localhost:5000/operators", {
+            .get(`${process.env.REACT_APP_API_BASE}/operators`, {
               params: { training_id: training.id },
             })
             .then((res) => {
@@ -102,11 +102,11 @@ export default function TrainingBoard() {
   const deleteOperator = (op) => {
     const name = typeof op === "string" ? op : op.name;
     axios
-      .delete("http://localhost:5000/operators", { params: { name } })
+      .delete(`${process.env.REACT_APP_API_BASE}/operators`, { params: { name } })
       .then(() => {
         trainings.forEach((training) => {
           axios
-            .get("http://localhost:5000/operators", {
+            .get(`${process.env.REACT_APP_API_BASE}/operators`, {
               params: { training_id: training.id },
             })
             .then((res) => {
@@ -139,7 +139,7 @@ export default function TrainingBoard() {
 
     axios
       .patch(
-        `http://localhost:5000/operators/${operator.id}/training/${trainingId}/status`,
+        `${process.env.REACT_APP_API_BASE}/operators/${operator.id}/training/${trainingId}/status`,
         {
           status: newStatus,
         }
@@ -150,7 +150,7 @@ export default function TrainingBoard() {
 
   const addTraining = (trainingData) => {
   axios
-    .post("http://localhost:5000/trainings", trainingData)
+    .post(`${process.env.REACT_APP_API_BASE}/trainings`, trainingData)
     .then(() => fetchTrainings())
     .catch((err) => {
       console.error("❌ Error adding training:", err);
@@ -160,7 +160,7 @@ export default function TrainingBoard() {
 
   const deleteTraining = (name) => {
     axios
-      .delete("http://localhost:5000/trainings", { params: { name } })
+      .delete(`${process.env.REACT_APP_API_BASE}/trainings`, { params: { name } })
       .then(() => fetchTrainings()) // Refresh list of trainings
       .catch((err) => {
         console.error("❌ Error deleting training:", err);
@@ -184,7 +184,7 @@ export default function TrainingBoard() {
       // Save the previous state for reverting if needed
       const prevTrainings = prev;
 
-      axios.patch("http://localhost:5000/trainings/reorder", reordered)
+      axios.patch(`${process.env.REACT_APP_API_BASE}/trainings/reorder`, reordered)
         .then(() => console.log("✅ Order saved"))
         .catch((err) => {
           // Show error message from backend if available
@@ -204,7 +204,7 @@ export default function TrainingBoard() {
 
   const renameTraining = (id, newName, onError) => {
     axios
-      .patch(`http://localhost:5000/trainings/${id}/rename`, { name: newName })
+      .patch(`${process.env.REACT_APP_API_BASE}/trainings/${id}/rename`, { name: newName })
       .then(() => fetchTrainings())
       .catch((err) => {
         console.error("❌ Rename error", err);
@@ -224,7 +224,7 @@ export default function TrainingBoard() {
       )
     );
     axios
-      .patch(`http://localhost:5000/trainings/${id}/importance`)
+      .patch(`${process.env.REACT_APP_API_BASE}/trainings/${id}/importance`)
       .then(() => fetchTrainings())
       .catch((err) => {
         console.error("❌ Error switching importance", err);
@@ -239,7 +239,7 @@ export default function TrainingBoard() {
       )
     );
 
-    axios.patch(`http://localhost:5000/trainings/${id}`, { [field]: value })
+    axios.patch(`${process.env.REACT_APP_API_BASE}/trainings/${id}`, { [field]: value })
       .catch(err => {
         alert("Failed to update training field.");
         console.error(err);

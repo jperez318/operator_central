@@ -1,7 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
+from db_setup import db
 from datetime import datetime
-
-db = SQLAlchemy()
 
 class Operator(db.Model):
     __tablename__ = 'operators'

@@ -1,12 +1,28 @@
 import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import DnDContext from "./components/DnDcontext";
 import Home from "./pages/Home";
-import DnDcontext from "./components/DnDcontext";
+import OperatorOTM from "./pages/OperatorOTM";
 
 function App() {
   return (
-    <DnDcontext>
-      <Home />
-    </DnDcontext>
+    <Router>
+      <nav style={{
+        background: "#24477F",
+        padding: "12px 24px",
+        display: "flex",
+        gap: "24px"
+      }}>
+        <Link to="/" style={{ color: "white", textDecoration: "none", fontWeight: 600 }}>Operator Skills Matrix</Link>
+        <Link to="/other" style={{ color: "white", textDecoration: "none", fontWeight: 600 }}>Other Page</Link>
+      </nav>
+      <DnDContext>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/other" element={<OperatorOTM />} />
+        </Routes>
+      </DnDContext>
+    </Router>
   );
 }
 

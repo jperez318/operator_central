@@ -1,21 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import request, Blueprint, jsonify
 from flask_cors import CORS
-from models import db, Operator, Training, TrainingStatus
+from db_setup import db
+from models.skills_matrix import Training, TrainingStatus, Operator
 from datetime import datetime
 
-app = Flask(__name__)
-CORS(app)
+skills_matrix_bp = Blueprint('skills_matrix', __name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Jp072303#@localhost/operator_training'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db.init_app(app)
-
-@app.route("/")
+@skills_matrix_bp.route("/")
 def index():
     return "Backend is running!"
 
-@app.route("/operators", methods=["GET"])
+@skills_matrix_bp.route("/operators", methods=["GET"])
 def get_operators():
     training_id = request.args.get("training_id", type=int)
 
@@ -31,7 +26,7 @@ def get_operators():
 
     return jsonify(results)
 
-@app.route("/operators", methods=["POST"])
+@skills_matrix_bp.route("/operators", methods=["POST"])
 def add_operator():
     data = request.json
     op = Operator(name=data["name"])
@@ -59,7 +54,7 @@ def add_operator():
     })
 
 
-@app.route("/operators", methods=["DELETE"])
+@skills_matrix_bp.route("/operators", methods=["DELETE"])
 def delete_operator():
     name = request.args.get("name")
     if not name:
@@ -73,7 +68,7 @@ def delete_operator():
     return jsonify({"message": f"Deleted operator(s) with name {name}"})
 
 
-@app.route("/trainings", methods=["POST"])
+@skills_matrix_bp.route("/trainings", methods=["POST"])
 def add_training():
     data = request.json
     print("DEBUG received data:", data)
@@ -110,7 +105,7 @@ def add_training():
 
     return jsonify({"id": training.id, "name": training.name})
 
-@app.route("/trainings", methods=["DELETE"])
+@skills_matrix_bp.route("/trainings", methods=["DELETE"])
 def delete_training():
     name = request.args.get("name")
     if not name:
@@ -123,7 +118,7 @@ def delete_training():
     db.session.commit()
     return jsonify({"message": f"Deleted training with name {name}"})
     
-@app.route("/trainings", methods=["GET"])
+@skills_matrix_bp.route("/trainings", methods=["GET"])
 def get_trainings():
     trainings = Training.query.order_by(Training.position).all()
     return jsonify([
@@ -139,7 +134,7 @@ def get_trainings():
         } for t in trainings
     ])
 
-@app.route("/trainings/<int:training_id>/importance", methods=["PATCH"])
+@skills_matrix_bp.route("/trainings/<int:training_id>/importance", methods=["PATCH"])
 def switch_importance(training_id):
     training = Training.query.get(training_id)
     if not training:
@@ -170,7 +165,7 @@ def switch_importance(training_id):
     db.session.commit()
     return jsonify({"status": "success"}), 200
 
-@app.route("/trainings/reorder", methods=["PATCH"])
+@skills_matrix_bp.route("/trainings/reorder", methods=["PATCH"])
 def reorder_trainings():
     data = request.get_json()
 
@@ -193,7 +188,7 @@ def reorder_trainings():
     db.session.commit()
     return jsonify({"status": "success"}), 200
 
-@app.route("/trainings/<int:training_id>/rename", methods=["PATCH"])
+@skills_matrix_bp.route("/trainings/<int:training_id>/rename", methods=["PATCH"])
 def rename_training(training_id):
     data = request.get_json()
     new_name = data.get("name")
@@ -213,7 +208,7 @@ def rename_training(training_id):
 
     return jsonify({"message": "Training renamed successfully"})
 
-@app.route("/trainings/<int:training_id>", methods=["PATCH"])
+@skills_matrix_bp.route("/trainings/<int:training_id>", methods=["PATCH"])
 def update_training(training_id):
     data = request.json
     training = Training.query.get(training_id)
@@ -228,7 +223,7 @@ def update_training(training_id):
     return jsonify({"message": "Training updated"})
 
 
-@app.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
+@skills_matrix_bp.route("/operators/<int:operator_id>/training/<int:training_id>/status", methods=["PATCH"])
 def update_status(operator_id, training_id):
     data = request.json
     new_status = data.get("status")
@@ -246,6 +241,3 @@ def update_status(operator_id, training_id):
 
     db.session.commit()
     return jsonify({"message": "Status updated"})
-
-if __name__ == "__main__":
-    app.run(debug=True)
