@@ -14,12 +14,12 @@ function App() {
         gap: "24px"
       }}>
         <Link to="/" style={{ color: "white", textDecoration: "none", fontWeight: 600 }}>Operator Skills Matrix</Link>
-        <Link to="/other" style={{ color: "white", textDecoration: "none", fontWeight: 600 }}>Other Page</Link>
+        <Link to="/operatorotm" style={{ color: "white", textDecoration: "none", fontWeight: 600 }}>Operator of the Month</Link>
       </nav>
       <DnDContext>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/other" element={<OperatorOTM />} />
+          <Route path="/operatorotm" element={<OperatorOTM />} />
         </Routes>
       </DnDContext>
     </Router>
