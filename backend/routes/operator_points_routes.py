@@ -14,7 +14,7 @@ def get_categories():
     categories = OOTMCategory.query.all()
     return jsonify([{"id": c.id, "name": c.name, "points": c.points} for c in categories])
 
-@operator_points_bp.route("/add_points", methods=["POST"])
+@operator_points_bp.route("/add_points", methods=["PATCH"])
 def add_points():
     data = request.json
     operator_id = data["operator_id"]
@@ -28,3 +28,12 @@ def add_points():
     op_points.points += points_to_add
     db.session.commit()
     return jsonify({"success": True, "new_points": op_points.points})
+
+@operator_points_bp.route("/new_month", methods=["PATCH"])
+def new_month():
+    data = OperatorPoints.query.all()
+    for op in data:
+        op.points_lastmonth = op.points
+        op.points = 0
+    db.session.commit()
+    return jsonify({"success": True})

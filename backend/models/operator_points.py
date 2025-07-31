@@ -5,6 +5,7 @@ class OperatorPoints(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     operator_id = db.Column(db.Integer, db.ForeignKey('operators.id'), nullable=False, unique=True)
     points = db.Column(db.Integer, default=0)
+    points_lastmonth = db.Column(db.Integer, default=0)
 
 class OOTMCategory(db.Model):
     __tablename__ = 'ootm_categories'
