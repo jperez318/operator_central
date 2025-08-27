@@ -7,6 +7,7 @@ import DeleteOperator from "./DeleteOperator";
 import AddTraining from "./AddTraining";
 import DeleteTraining from "./DeleteTraining";
 import TrainingRow from "./TrainingRow";
+import styles from "./TrainingBoard.module.css";
 
 const categories = ["not_trained", "trained", "shadowed", "ran_in_workshop", "can_train"];
 const displayNames = {
@@ -31,7 +32,7 @@ export default function TrainingBoard() {
   const [showAddTrainingModal, setShowAddTrainingModal] = useState(false);
   const [showDeleteTrainingModal, setShowDeleteTrainingModal] = useState(false);
   const [trainings, setTrainings] = useState([]);
-  const [isLocked, setIsLocked] = useState(true);
+  const [isLocked, setIsLocked] = useState(false);
 
   const fetchTrainings = () => {
     axios.get(`${process.env.REACT_APP_API_BASE}/trainings`).then((res) => {
@@ -247,48 +248,42 @@ export default function TrainingBoard() {
   };
   
   return (
-      <div style={{padding: "20px" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
-          <h1 style={{ color: "white", marginBottom: "20px" }}>Operator Skills Matrix</h1>
+      <div className={styles.boardContainer}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Operator Skills Matrix</h1>
 
-          <div style={{ display: "flex", gap: "20px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+          <div className={styles.controls}>
             <button
               onClick={() => setShowAddOperatorModal(true)}
-              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+              className={styles.button}
             >
               ➕ Add Operator
             </button>
 
             <button
               onClick={() => setShowDeleteOperatorModal(true)}
-              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+              className={styles.button}
             >
               🗑️ Delete Operator
             </button>
 
             <button
               onClick={() => setShowAddTrainingModal(true)}
-              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: 'white', padding: 8 }}
+              className={styles.button}
             >
               ➕ Add Training
             </button>
 
             <button
               onClick={() => setShowDeleteTrainingModal(true)}
-              style={{ backgroundColor: "#24477F", borderRadius: "10px", color: "white", padding: 8 }}
+              className={styles.button}
             >
               🗑️ Delete Training
             </button>
 
             <button
               onClick={() => setIsLocked((prev) => !prev)}
-              style={{
-                backgroundColor: isLocked ? "green" : "red",
-                color: "white",
-                borderRadius: "10px",
-                padding: 8,
-                marginLeft: 10,
-              }}
+              className={`${styles.button} ${isLocked ? styles.lockButtonLocked : styles.lockButtonUnlocked}`}
             >
               {isLocked ? "Unlock Drag & Drop" : "Lock Drag & Drop"}
             </button>
@@ -319,7 +314,7 @@ export default function TrainingBoard() {
           </div>
         </div>
 
-       {trainings.map((training, index) => (
+        {trainings.map((training, index) => (
           <TrainingRow
             key={training.id}
             training={training}
@@ -332,7 +327,7 @@ export default function TrainingBoard() {
             onSwitchImportance={switch_importance}
             onFieldChange={handleTrainingFieldChange}
           >
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className={styles.trainingRow}>
               {categories.map((status) => (
                 <Column
                   key={status}
@@ -363,22 +358,13 @@ function Column({ status, displayName, isLocked, operators, onDrop }) {
     }),
   }));
 
-  const baseColor = colors[status] || "#f9f9f9";
-  const background = isOver ? "#e6f7ff" : baseColor;
+  const columnClass = isOver
+    ? `${styles.column} ${styles.columnOver}`
+    : styles.column;
 
   return (
-    <div
-      ref={dropRef}
-      style={{
-        flex: 1,
-        minHeight: "300px",
-        padding: "10px",
-        border: "2px dashed #ccc",
-        background,
-        borderRadius: "8px",
-      }}
-    >
-      <h3>{displayName}</h3>
+    <div ref={dropRef} className={columnClass}>
+      <h3 className={styles.columnTitle}>{displayName}</h3>
       {operators.map((op) => (
         <OperatorCard key={op.id} operator={op} isLocked={isLocked} />
       ))}

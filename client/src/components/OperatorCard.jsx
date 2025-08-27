@@ -1,5 +1,6 @@
 import React from "react";
 import { useDrag } from "react-dnd";
+import styles from "./TrainingBoard.module.css";
 
 export default function OperatorCard({ operator, isLocked }) {
   const statusColors = {
@@ -43,17 +44,11 @@ const backgroundColor = statusColors[operator.status] || "#ffffff";
 
   return (
     <div
-    ref={dragRef}
+      ref={dragRef}
+      className={styles.operatorCard}
       style={{
-        display: "inline-block", // <-- Add this line
+        backgroundColor,
         opacity: isDragging ? 0.5 : 1,
-        padding: "5px",
-        margin: "5px 5px",
-        fontSize: "1.1em",
-        background: backgroundColor,
-        border: "1px solid #ddd",
-        borderRadius: "10px",
-        cursor: "move",
       }}
       title={operator.date_assigned ? getSinceString(operator.date_assigned) : ""}
     >

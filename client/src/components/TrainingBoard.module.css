@@ -1,0 +1,85 @@
+:root {
+  --background: #000203;
+  --text: #333;
+}   
+.boardContainer {
+  padding: 20px;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin-bottom: 20px;
+  color: white;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button {
+  background-color: #24477f;
+  border-radius: 10px;
+  color: white;
+  padding: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #3c5e98;
+}
+
+.lockButtonLocked {
+  background-color: green;
+}
+
+.lockButtonUnlocked {
+  background-color: red;
+}
+
+.trainingRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.column {
+  flex: 1;
+  min-height: 300px;
+  padding: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.columnOver {
+  background-color: #e6f7ff !important;
+}
+
+.columnTitle {
+  margin-top: 0;
+}
+
+.operatorCard {
+  display: inline-block;
+  padding: 5px;
+  margin: 5px;
+  font-size: 1.1em;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: move;
+  transition: opacity 0.2s ease;
+}

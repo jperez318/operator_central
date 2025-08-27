@@ -13,6 +13,16 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
   const [line, setLine] = useState(training.line || "");
   const [information, setInformation] = useState(training.information || "");
 
+  const lineBorderColors = {
+    "Warehouse": "#6be6ffff",                          
+    "Tea Line": "#16a085",               
+    "SMED": "#2e9635ff",                            
+    "Compressor": "#2980b9",                             
+    "Cylinder": "#34495e",                      
+    "Bottling": "#9b59b6",               
+  };
+  const borderColor = lineBorderColors[training.line] || "#bdc3c7";
+
   useEffect(() => {
     setNewName(training.name);
   }, [training.name]);
@@ -95,9 +105,10 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
         borderRadius: "16px",
         padding: 16,
         marginBottom: 20,
-        background: "#24477F",
+        background: "black",
         color: "white",
         position: "relative",
+        border: `10px solid ${borderColor}`,
       }}
     >
       {/* Importance Toggle Button */}
@@ -167,7 +178,7 @@ const TrainingRow = ({ training, index, moveTraining, children, isLocked, onRena
           </div>
         </>
       )}
-      <div style={{ color: "black", marginTop: "10px" }}>{children}</div>
+      <div style={{ color: "white", marginTop: "10px" }}>{children}</div>
     </div>
   );
 }
