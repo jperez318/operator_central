@@ -45,22 +45,35 @@ The total points for each operator are tracked and updated in real-time, with wh
   - `points` (current point total per operator)
   - `ootm_categories` (categories and how many points each is worth)
 
-## 📦 Folder Structure (Backend)
+### 📁 Project Structure
+```
+ILC_Operator_Central/ 
+├── backend/
+│   ├── app.py                  # Flask app entrypoint
+│   ├── config.py               # App configuration
+│   ├── db_setup.py             # SQLAlchemy setup
+│   ├── models/
+│   │   ├── operator.py
+│   │   ├── skills_matrix.py
+│   │   └── operator_points.py
+│   ├── routes/
+│   │   ├── skills_matrix_routes.py
+│   │   └── operator_points_routes.py
+│   └── services/
+│       ├── skills_matrix_service.py
+│       └── operator_points_service.py
+├── client/                     # React frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── App.js
+│   └── package.json
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
-backend/
-│
-├── app.py                 # Flask app entrypoint
-├── config.py              # Config
-├── db_setup.py           # SQLAlchemy instance
-│
-├── models/
-│   ├── operator.py
-│   ├── skills_matrix.py
-│   └── operator_points.py
-│
-├── routes/
-│   ├── skills_matrix_routes.py
-│   └── operator_points_routes.py
 
 ## ⚙️ Setup
 
